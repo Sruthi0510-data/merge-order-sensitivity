@@ -8,6 +8,15 @@ seeded by the caller, so the same seed produces byte-identical JSONL on any mach
 Three of the knobs deliberately overlap. A key can be both tied and cross-batch, and those
 are exactly the keys the repository's headline is about, so the generator does not partition
 the population into tidy disjoint groups the way a synthetic benchmark would.
+
+`tombstone_tie_rate` exists because the first version of this file did not have it. A tie was
+placed at a uniformly random position and a tombstone only ever landed at the last one, so a
+tie containing a tombstone needed both draws to agree and the shipped fixture contained zero
+of them. The `delete-wins` implementation, whose entire purpose is resolving exactly that
+tie, was therefore never exercised, and the audit reported it as indistinguishable from the
+implementation it was supposed to improve on. That is the repository's own thesis one level
+up: a run that finds no difference cannot say whether the fix does nothing or the fixture
+never asked. The knob forces the case, and a test asserts the shipped fixture contains it.
 """
 
 from __future__ import annotations
@@ -32,6 +41,7 @@ class GeneratorConfig:
     tie_rate: float = 0.22
     cross_batch_rate: float = 0.35
     delete_rate: float = 0.12
+    tombstone_tie_rate: float = 0.55
     reorder_rate: float = 0.30
 
     def __post_init__(self) -> None:
@@ -41,7 +51,9 @@ class GeneratorConfig:
             raise ConfigError("batches must be at least 1")
         if self.max_events_per_key < 1:
             raise ConfigError("max_events_per_key must be at least 1")
-        for name in ("tie_rate", "cross_batch_rate", "delete_rate", "reorder_rate"):
+        rates = ("tie_rate", "cross_batch_rate", "delete_rate", "tombstone_tie_rate",
+                 "reorder_rate")
+        for name in rates:
             value = getattr(self, name)
             if not 0.0 <= value <= 1.0:
                 raise ConfigError(f"{name} must be between 0 and 1, got {value}")
@@ -67,17 +79,21 @@ def generate(config: GeneratorConfig | None = None) -> list[ChangeEvent]:
         home_batch = rng.randrange(config.batches)
         spans = rng.random() < config.cross_batch_rate and config.batches > 1
         tie = rng.random() < config.tie_rate and count > 1
+        ends_with_delete = rng.random() < config.delete_rate
 
         seqs = [base_seq + step for step in range(count)]
         if tie:
-            collide = rng.randrange(1, count)
+            if ends_with_delete and rng.random() < config.tombstone_tie_rate:
+                collide = count - 1
+            else:
+                collide = rng.randrange(1, count)
             seqs[collide] = seqs[collide - 1]
 
         for position in range(count):
             batch = home_batch
             if spans and position > 0:
                 batch = min(config.batches - 1, home_batch + rng.randint(1, 2))
-            is_delete = position == count - 1 and rng.random() < config.delete_rate
+            is_delete = ends_with_delete and position == count - 1
             payload = (
                 {}
                 if is_delete
