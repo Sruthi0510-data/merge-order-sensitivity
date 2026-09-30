@@ -54,6 +54,7 @@ rendering:
 
 report:
 	-$(PYTHON) -m mos.cli report --out docs/report.html
+	PYTHONPATH=$(SRC) $(PY) tools/proof_of_work.py
 
 screenshots: report
 	$(PYTHON) tools/capture_screenshots.py

@@ -128,7 +128,7 @@
     "orders_that_exist": 13449,
     "rerun_keys_flagged": 0,
     "rows_changed_by_fix": 9,
-    "tests_total": 337,
+    "tests_total": 343,
     "unreachable_bound_pct": 21.4,
     "worst_impl_order_dependent": 325
   },

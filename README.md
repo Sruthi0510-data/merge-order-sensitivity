@@ -27,7 +27,7 @@ On the committed fixture of 1,250 events, 400 primary keys and 6 micro-batches:
 - Zero hits across that unreachable population bounds the harness detection rate **below 21.4%** at 95% confidence, not at zero. A measured zero is a sample size, not a fact.
 - Declaring a total order removes every finding and **rewrites 9 rows**, which is the migration nobody budgets for.
 
-337 tests, 100.0% line and 100.0% branch coverage, and every figure on this page is re-measured by CI and matched against the wording around it by `tools/check_numbers.py`.
+343 tests, 100.0% line and 100.0% branch coverage, and every figure on this page is re-measured by CI and matched against the wording around it by `tools/check_numbers.py`.
 
 ## Quickstart
 
@@ -193,12 +193,24 @@ make verify     all of the above, offline, from a fresh clone
 
 `tools/check_numbers.py` matches anchor phrases rather than bare digits, because searching for digits passes happily while the sentence around them has gone stale. It collapses whitespace first so an anchor whose words straddle a wrapped line cannot fail correct prose, and it checks backwards as well: any number in this README that no metric explains is reported as unguarded.
 
+## Proof of work
+
+The transcript below was produced by running the commands, not by transcribing
+them. `tools/proof_of_work.py` executes each one in a subprocess, records the
+exit code, and fails the build when a command does not exit the way this README
+says it does, so all four documented exit codes are demonstrated rather than asserted. Elapsed times and absolute paths are normalised so the
+committed image does not change on every run; nothing else is touched, and the
+full untruncated output with a SHA-256 of each command's bytes is in
+`docs/proof-of-work.json`.
+
+![Captured terminal transcript of the suite and the command line](docs/img/proof-of-work.svg)
+
 ## Tech stack
 
 | technology | role here | why this one |
 | --- | --- | --- |
 | Python, standard library only | the whole audit engine | the core is permutation and comparison; a dependency would have to earn its place and none did |
-| pytest with coverage | 337 tests, at 100.0% line and 100.0% branch | branch coverage is the one that matters for a module full of tie-breaking conditionals |
+| pytest with coverage | 343 tests, at 100.0% line and 100.0% branch | branch coverage is the one that matters for a module full of tie-breaking conditionals |
 | ruff | lint and import order | one tool over source, tests, tooling and experiments, so the experiments cannot drift into scratch code |
 | deltalake, optional extra | writing an audited table to a real Delta table | proves a witness produces two different Delta tables rather than two different Python dicts, without a JVM |
 | Playwright with Chromium | asserting the committed SVGs load as images | only a browser can see a `naturalWidth` of 0, so only a browser can check it |

@@ -133,3 +133,51 @@ def test_the_two_verdict_classes_have_different_backgrounds():
     clear = re.search(r"\.verdict-clear \{[^}]*background: (#[0-9a-f]+)", STYLESHEET)
     assert finding and clear
     assert finding.group(1) != clear.group(1)
+
+
+# The proof-of-work transcript. These assertions are about a committed artefact
+# rather than about a function, so they need only the standard library and the
+# repository root.
+import json
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_the_proof_of_work_transcript_exists_and_covers_several_exit_codes():
+    """A transcript that only ever shows a zero proves the least interesting thing."""
+    payload = json.loads((ROOT / "docs" / "proof-of-work.json").read_text())
+    codes = {capture["exit_code"] for capture in payload["captures"]}
+    assert len(codes) >= 3
+
+
+def test_every_captured_command_exited_as_the_readme_claims():
+    payload = json.loads((ROOT / "docs" / "proof-of-work.json").read_text())
+    for capture in payload["captures"]:
+        assert capture["exit_code"] == capture["expected_exit_code"], capture["command"]
+
+
+def test_every_captured_command_carries_a_hash_of_its_untruncated_output():
+    payload = json.loads((ROOT / "docs" / "proof-of-work.json").read_text())
+    for capture in payload["captures"]:
+        assert len(capture["output_sha256"]) == 64
+
+
+def test_the_transcript_leaks_no_absolute_path():
+    svg = (ROOT / "docs" / "img" / "proof-of-work.svg").read_text(encoding="utf-8")
+    assert str(ROOT) not in svg
+    assert "/usr/bin/python" not in svg
+
+
+def test_the_transcript_is_valid_svg_with_a_title_and_description():
+    import xml.etree.ElementTree as ET
+
+    namespace = "{http://www.w3.org/2000/svg}"
+    root = ET.parse(ROOT / "docs" / "img" / "proof-of-work.svg").getroot()
+    assert root.find(f"{namespace}title") is not None
+    assert root.find(f"{namespace}desc") is not None
+
+
+def test_the_readme_embeds_the_transcript():
+    text = (ROOT / "README.md").read_text(encoding="utf-8")
+    assert "docs/img/proof-of-work.svg" in text
