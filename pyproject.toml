@@ -1,0 +1,59 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "merge-order-sensitivity"
+version = "0.1.0"
+description = "Audits lakehouse MERGE logic for order sensitivity, a property the standard re-run idempotency test structurally cannot detect."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Laxmi Sruthi Susarla" }]
+dependencies = []
+
+[project.optional-dependencies]
+delta = ["deltalake>=0.15", "pyarrow>=14"]
+report = ["jinja2>=3.1"]
+dev = [
+  "pytest>=7.4",
+  "pytest-cov>=4.1",
+  "ruff>=0.4",
+]
+
+[project.scripts]
+mos = "mos.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+markers = [
+  "delta: requires the optional deltalake extra",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["mos"]
+omit = ["*/mos/report.py"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "pragma: no cover",
+  "if TYPE_CHECKING:",
+  "raise NotImplementedError",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests", "tools", "experiments"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "C4", "RET", "ARG", "PTH"]
+ignore = ["B008"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["ARG001", "ARG002"]

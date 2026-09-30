@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+.coverage
+coverage.xml
+coverage.json
+.pytest_cache/
+.ruff_cache/
+junit.xml
+htmlcov/
+docs/report.html
+docs/video/*.webm
+.delta-scratch/
