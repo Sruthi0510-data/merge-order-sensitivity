@@ -128,6 +128,49 @@ def test_the_underpowered_check_is_opt_in():
     assert code == exit_codes.FINDING
 
 
+SPEC_FILE = FIXTURE_PATH.parents[1] / "specs" / "payments.toml"
+
+
+def test_audit_accepts_a_reviewed_spec_file():
+    code, text = run("audit", "--fixture", str(FIXTURE_PATH), "--spec", str(SPEC_FILE))
+    assert code == exit_codes.FINDING
+    assert json.loads(text)["spec"]["ordering"] == ["seq"]
+
+
+def test_a_spec_file_and_flags_together_are_refused_rather_than_resolved():
+    """Two sources for one declaration is how a team audits something it did not review."""
+    code, text = run(
+        "audit", "--fixture", str(FIXTURE_PATH),
+        "--spec", str(SPEC_FILE), "--order-by", "seq,event_id",
+    )
+    assert code == exit_codes.USAGE
+    assert "cannot be combined" in text
+
+
+def test_a_spec_file_with_delete_wins_flag_is_also_refused():
+    code, text = run(
+        "audit", "--fixture", str(FIXTURE_PATH), "--spec", str(SPEC_FILE), "--delete-wins"
+    )
+    assert code == exit_codes.USAGE
+
+
+def test_a_missing_spec_file_is_a_usage_error(tmp_path: Path):
+    code, text = run("audit", "--fixture", str(FIXTURE_PATH), "--spec", str(tmp_path / "x.toml"))
+    assert code == exit_codes.USAGE
+    assert "merge spec not found" in text
+
+
+def test_every_subcommand_that_audits_accepts_a_spec_file(tmp_path: Path):
+    for argv in (
+        ("compare", "--fixture", str(FIXTURE_PATH), "--spec", str(SPEC_FILE)),
+        ("harness", "--fixture", str(FIXTURE_PATH), "--spec", str(SPEC_FILE), "--draws", "2"),
+        ("report", "--fixture", str(FIXTURE_PATH), "--spec", str(SPEC_FILE),
+         "--out", str(tmp_path / "r.html")),
+    ):
+        code, _ = run(*argv)
+        assert code in (exit_codes.OK, exit_codes.FINDING), argv
+
+
 def test_compare_tabulates_every_bundled_implementation():
     code, text = run("compare", "--fixture", str(FIXTURE_PATH))
     assert code == exit_codes.FINDING

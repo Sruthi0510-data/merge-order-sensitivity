@@ -7,7 +7,7 @@ name = "merge-order-sensitivity"
 version = "0.1.0"
 description = "Audits lakehouse MERGE logic for order sensitivity, a property the standard re-run idempotency test structurally cannot detect."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "Laxmi Sruthi Susarla" }]
 dependencies = []
@@ -47,7 +47,7 @@ exclude_lines = [
 
 [tool.ruff]
 line-length = 100
-target-version = "py310"
+target-version = "py311"
 src = ["src", "tests", "tools", "experiments"]
 
 [tool.ruff.lint]

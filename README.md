@@ -1,5 +1,10 @@
 # merge-order-sensitivity
 
+[![ci](https://github.com/Sruthi0510-data/merge-order-sensitivity/actions/workflows/ci.yml/badge.svg)](https://github.com/Sruthi0510-data/merge-order-sensitivity/actions/workflows/ci.yml)
+[![python](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue)](https://www.python.org/)
+[![coverage](https://img.shields.io/badge/coverage-100%25%20line%20and%20branch-brightgreen)](#quickstart)
+[![licence](https://img.shields.io/badge/licence-MIT-lightgrey)](LICENSE)
+
 **An auditor for lakehouse MERGE logic that reports which rows were chosen by delivery accident rather than by your sequence column, and which of those no test you could write will ever catch.**
 
 ## The question a re-run test cannot answer
@@ -22,7 +27,7 @@ On the committed fixture of 1,250 events, 400 primary keys and 6 micro-batches:
 - Zero hits across that unreachable population bounds the harness detection rate **below 21.4%** at 95% confidence, not at zero. A measured zero is a sample size, not a fact.
 - Declaring a total order removes every finding and **rewrites 9 rows**, which is the migration nobody budgets for.
 
-317 tests, 100.0% line and 100.0% branch coverage, and every figure on this page is re-measured by CI and matched against the wording around it by `tools/check_numbers.py`.
+337 tests, 100.0% line and 100.0% branch coverage, and every figure on this page is re-measured by CI and matched against the wording around it by `tools/check_numbers.py`.
 
 ## Quickstart
 
@@ -33,17 +38,36 @@ git clone https://github.com/Sruthi0510-data/merge-order-sensitivity.git
 cd merge-order-sensitivity
 pip install -e ".[dev]"
 
-# the headline number
-mos audit --fixture fixtures/cdc_events.jsonl --impl dedupe-last-max
+# the headline number, against the declaration in specs/payments.toml
+mos audit --fixture fixtures/cdc_events.jsonl --spec specs/payments.toml
 
 # what a permutation harness would have found instead
 mos harness --draws 20
+
+# the two arrival orders behind one finding, replayable by hand
+mos witness acct-00045
 
 # re-measure everything on this page and fail if a sentence has gone stale
 make verify
 ```
 
 <img src="docs/diagrams/architecture.svg" alt="Three arms over the same event stream: the re-run control, the reachable permutation arm, the unreachable cross-batch arm, and the referee that resolves each key from the event multiset" width="712">
+
+## The declaration is a file, not a flag
+
+The audit needs you to state which event wins. It reads that from a TOML file rather than only
+from a flag, because a declaration nobody reviewed is the defect this repository is about, and a
+flag leaves no record for a colleague to disagree with.
+
+```toml
+# specs/payments.toml
+ordering = ["seq"]        # partial: one commit LSN can cover several rows
+delete_wins_ties = false  # a partial fix that resolves nothing between two upserts
+```
+
+Unknown keys are refused rather than ignored, so a typo in a reviewed file cannot quietly mean
+the default. A spec file combined with `--order-by` is refused too: two sources for one
+declaration is how a team ends up auditing something other than what it reviewed.
 
 ## The two defect classes have different fixes
 
@@ -145,6 +169,7 @@ src/mos/
   detection.py       draws needed, and the rule of three
   generator.py       the seeded fixture generator
   delta.py           optional: write an audited table to Delta
+specs/               the merge declaration, as a reviewable TOML file
 experiments/         five experiments, each writing JSON to docs/experiments/
 tools/               metrics collection, number checking, diagrams, rendering
 docs/adr/            five architecture decision records
@@ -173,7 +198,7 @@ make verify     all of the above, offline, from a fresh clone
 | technology | role here | why this one |
 | --- | --- | --- |
 | Python, standard library only | the whole audit engine | the core is permutation and comparison; a dependency would have to earn its place and none did |
-| pytest with coverage | 317 tests, at 100.0% line and 100.0% branch | branch coverage is the one that matters for a module full of tie-breaking conditionals |
+| pytest with coverage | 337 tests, at 100.0% line and 100.0% branch | branch coverage is the one that matters for a module full of tie-breaking conditionals |
 | ruff | lint and import order | one tool over source, tests, tooling and experiments, so the experiments cannot drift into scratch code |
 | deltalake, optional extra | writing an audited table to a real Delta table | proves a witness produces two different Delta tables rather than two different Python dicts, without a JVM |
 | Playwright with Chromium | asserting the committed SVGs load as images | only a browser can see a `naturalWidth` of 0, so only a browser can check it |

@@ -18,10 +18,13 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from mos.errors import ConfigError
 from mos.events import ChangeEvent, Op
+
+if TYPE_CHECKING:  # pragma: no cover
+    from pathlib import Path
 
 ORDERABLE_FIELDS = ("seq", "batch", "source", "event_id")
 """Fields a declaration may order by.
@@ -62,6 +65,40 @@ class MergeSpec:
             )
         if len(set(self.ordering)) != len(self.ordering):
             raise ConfigError(f"ordering field repeated in {self.ordering}")
+
+    @classmethod
+    def from_file(cls, path: Path) -> MergeSpec:
+        """Load a declaration from a TOML file.
+
+        Reading the spec from a file rather than from flags is the whole argument of ADR-001:
+        the declaration is the thing a team has never written down, and a flag leaves no record
+        for anyone to disagree with in review. Unknown keys are refused rather than ignored, so
+        a typo in a reviewed file cannot silently mean the default.
+        """
+        import tomllib
+
+        if not path.exists():
+            raise ConfigError(f"merge spec not found: {path}")
+        try:
+            raw = tomllib.loads(path.read_text(encoding="utf-8"))
+        except tomllib.TOMLDecodeError as exc:
+            raise ConfigError(f"{path} is not valid TOML: {exc}") from exc
+
+        allowed = {"name", "ordering", "delete_wins_ties"}
+        unknown = sorted(set(raw) - allowed)
+        if unknown:
+            raise ConfigError(f"{path} has unknown key(s) {unknown}; allowed: {sorted(allowed)}")
+        ordering = raw.get("ordering")
+        if not isinstance(ordering, list) or not all(isinstance(f, str) for f in ordering):
+            raise ConfigError(f"{path} must set ordering to a list of field names")
+        delete_wins = raw.get("delete_wins_ties", False)
+        if not isinstance(delete_wins, bool):
+            raise ConfigError(f"{path} must set delete_wins_ties to true or false")
+        return cls(
+            ordering=tuple(ordering),
+            delete_wins_ties=delete_wins,
+            name=str(raw.get("name", "declared")),
+        )
 
     def rank(self, event: ChangeEvent) -> tuple[Any, ...]:
         """The ordering key for one event. Later rank wins."""

@@ -1,0 +1,32 @@
+# A merge declaration. This file is the point of the tool.
+#
+# The audit needs a statement of which event wins, written somewhere a colleague can disagree
+# with it in review. Passing the same thing as a command line flag works and leaves no record,
+# and a declaration nobody reviewed is the defect this repository is about.
+#
+# Run:  mos audit --spec specs/payments.toml
+
+name = "payments-cdc"
+
+# Fields that decide which event is later, most significant first. Allowed: seq, batch, source,
+# event_id. `arrival_index` is deliberately not allowed: ordering by arrival is not a claim
+# about the data, it restates the delivery accident, and it would let this file declare itself
+# unambiguous while changing nothing.
+#
+# Ordering by seq alone is the common production setting and it is partial: the source assigns
+# the same commit LSN to changes written in one transaction, so two rows can tie. Audit with
+# this first to find out how much that costs, then decide.
+ordering = ["seq"]
+
+# When two events tie on every field above and one is a tombstone, let the tombstone win.
+# A partial fix. It resolves nothing between two upserts, which is most of the ties here.
+delete_wins_ties = false
+
+# The fix, when you are ready to pay for it: add a field that is unique per event, which makes
+# the comparison a total order and the maximum unique.
+#
+#   ordering = ["seq", "event_id"]
+#
+# The cost is real and the repository measures it: the tie is then broken by something with no
+# business meaning, so some keys end up holding a different row than they hold today. Consistent
+# is not the same as correct, and this file is where that trade-off should be argued.

@@ -24,11 +24,34 @@ from mos.implementations import IMPLEMENTATIONS
 from mos.semantics import MergeSpec
 
 DEFAULT_FIXTURE = Path("fixtures/cdc_events.jsonl")
+DEFAULT_ORDER_BY = "seq"
 
 
 def _spec_from_args(args: argparse.Namespace) -> MergeSpec:
+    """Build the declaration, from a reviewed file when one is given and from flags otherwise.
+
+    A file and flags together is refused rather than silently resolved. Two sources for one
+    declaration is how a team ends up auditing something other than what it reviewed.
+    """
+    spec_path = getattr(args, "spec", None)
+    if spec_path is not None:
+        if args.order_by != DEFAULT_ORDER_BY or args.delete_wins:
+            raise ConfigError(
+                "--spec cannot be combined with --order-by or --delete-wins; "
+                "put the ordering in the spec file"
+            )
+        return MergeSpec.from_file(spec_path)
     ordering = tuple(field.strip() for field in args.order_by.split(",") if field.strip())
     return MergeSpec(ordering=ordering, delete_wins_ties=args.delete_wins)
+
+
+def _add_spec_arguments(parser: argparse.ArgumentParser) -> None:
+    """The three ways to state a declaration, on every subcommand that needs one."""
+    parser.add_argument(
+        "--spec", type=Path, default=None, help="a reviewed merge declaration, as TOML"
+    )
+    parser.add_argument("--order-by", default=DEFAULT_ORDER_BY)
+    parser.add_argument("--delete-wins", action="store_true")
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -52,8 +75,7 @@ def _build_parser() -> argparse.ArgumentParser:
     aud = sub.add_parser("audit", help="run the three-arm audit over a fixture")
     aud.add_argument("--fixture", type=Path, default=DEFAULT_FIXTURE)
     aud.add_argument("--impl", default="dedupe-last-max", choices=sorted(IMPLEMENTATIONS))
-    aud.add_argument("--order-by", default="seq")
-    aud.add_argument("--delete-wins", action="store_true")
+    _add_spec_arguments(aud)
     aud.add_argument("--search-limit", type=int, default=512)
     aud.add_argument("--seed", type=int, default=0)
     aud.add_argument("--json", type=Path, default=None, help="write the full finding set here")
@@ -66,29 +88,25 @@ def _build_parser() -> argparse.ArgumentParser:
 
     cmp_ = sub.add_parser("compare", help="audit every bundled implementation and tabulate")
     cmp_.add_argument("--fixture", type=Path, default=DEFAULT_FIXTURE)
-    cmp_.add_argument("--order-by", default="seq")
-    cmp_.add_argument("--delete-wins", action="store_true")
+    _add_spec_arguments(cmp_)
     cmp_.add_argument("--json", type=Path, default=None)
 
     wit = sub.add_parser("witness", help="print the two arrival orders that disagree for one key")
     wit.add_argument("key")
     wit.add_argument("--fixture", type=Path, default=DEFAULT_FIXTURE)
     wit.add_argument("--impl", default="dedupe-last-max", choices=sorted(IMPLEMENTATIONS))
-    wit.add_argument("--order-by", default="seq")
-    wit.add_argument("--delete-wins", action="store_true")
+    _add_spec_arguments(wit)
 
     rep = sub.add_parser("report", help="write a self-contained HTML report")
     rep.add_argument("--fixture", type=Path, default=DEFAULT_FIXTURE)
     rep.add_argument("--impl", default="dedupe-last-max", choices=sorted(IMPLEMENTATIONS))
-    rep.add_argument("--order-by", default="seq")
-    rep.add_argument("--delete-wins", action="store_true")
+    _add_spec_arguments(rep)
     rep.add_argument("--out", type=Path, default=Path("docs/report.html"))
 
     har = sub.add_parser("harness", help="simulate the permutation harness a team would build")
     har.add_argument("--fixture", type=Path, default=DEFAULT_FIXTURE)
     har.add_argument("--impl", default="dedupe-last-max", choices=sorted(IMPLEMENTATIONS))
-    har.add_argument("--order-by", default="seq")
-    har.add_argument("--delete-wins", action="store_true")
+    _add_spec_arguments(har)
     har.add_argument("--draws", type=int, default=20)
     har.add_argument("--seed", type=int, default=0)
     return parser

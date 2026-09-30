@@ -12,7 +12,7 @@ from __future__ import annotations
 import json
 from collections.abc import Iterable, Iterator, Mapping
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
@@ -21,8 +21,12 @@ from mos.errors import FixtureError
 REQUIRED_FIELDS = ("event_id", "key", "seq", "op", "source", "batch")
 
 
-class Op(str, Enum):
-    """A change event either asserts a row state or removes the row. Nothing else."""
+class Op(StrEnum):
+    """A change event either asserts a row state or removes the row. Nothing else.
+
+    StrEnum rather than `str, Enum`: the members compare equal to their values either way, and
+    the explicit base is the one that survives a lint pass on Python 3.11 and later.
+    """
 
     UPSERT = "upsert"
     DELETE = "delete"
