@@ -1,0 +1,8 @@
+{
+  "diagrams": [
+    "architecture.svg",
+    "order-space.svg"
+  ],
+  "source": "tools/render_diagrams.py",
+  "note": "figures are read from docs/metrics.json so a diagram cannot go stale"
+}
