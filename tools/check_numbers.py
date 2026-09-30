@@ -10,12 +10,20 @@ Whitespace in every document is collapsed before matching. Without that, an anch
 words happen to straddle a line break in wrapped markdown matches nothing while the prose it
 guards is correct, and the first thing anyone learns is to pass --no-verify.
 
-Two directions are checked. Forwards: every metric must appear, with its current value,
-somewhere in the checked documents. Backwards: every number in the README must correspond to
-a metric, so a figure nothing re-measures cannot quietly appear. Code fences, inline code
-spans and HTML attributes are excluded from the backward check, because an example
-invocation is allowed to contain a made-up row count and flagging it trains the reader to
-ignore the section.
+Three passes, and the third exists because the first two were not enough. Forwards: every
+metric must appear, with its current value, somewhere in the checked documents. Backwards:
+every number in the README must correspond to a metric, so a figure nothing re-measures
+cannot quietly appear. Code fences, inline code spans and HTML attributes are excluded from
+the backward pass, because an example invocation is allowed to contain a made-up row count and
+flagging it trains the reader to ignore the section.
+
+The third pass is per document and looks for stale wording. Breaking a README figure on
+purpose showed the hole: the forward pass searches the union of the documents, so a README
+that has gone stale still passes when another document happens to quote the figure correctly,
+and the backward pass only catches it when the wrong value is not itself some other metric.
+Changing "finds 18 of" to "finds 32 of" defeated both. So every document is now searched
+separately for each anchor's wording, and a match carrying any value other than the current
+one fails the build and names the file.
 """
 
 from __future__ import annotations
@@ -35,12 +43,15 @@ LINK_TARGET = re.compile(r"\]\([^)]*\)")
 NUMBER = re.compile(r"(?<![\w.-])\d[\d,]*(?:\.\d+)?(?![\w-])")
 
 ALLOWED_BARE_NUMBERS = {
-    "0", "1", "2", "3", "4", "5", "7", "10", "100", "2026", "3.10", "3.11", "3.12", "3.13",
+    "0", "1", "2", "3", "4", "5", "7", "95", "100", "2026",
+    "3.10", "3.11", "3.12", "3.13", "20260930",
 }
 """Numbers a document may contain without a metric behind them.
 
-Version numbers, exit codes, ADR indices and small structural counts. Everything else must be
-a figure the collector re-measures.
+Python versions, exit codes, small structural counts, the generator seed, and 95 as the
+confidence level every interval in these documents is stated at. Everything else must be a
+figure the collector re-measures. The list is deliberately short: each entry is a hole in the
+guarantee, so an addition should be argued for rather than made to get a build green.
 """
 
 
@@ -93,11 +104,33 @@ def check_forward(payload: dict[str, Any], documents: dict[str, str]) -> list[st
 def _stale_variant(anchors: list[str], corpus: str) -> str | None:
     """Find an anchor whose wording is present with some other number in it."""
     for anchor in anchors:
-        pattern = re.escape(collapse(anchor)).replace(r"\{\}", r"([\d,.]+)")
+        pattern = re.escape(collapse(anchor)).replace(r"\{\}", r"(\d[\d,.]*)")
         match = re.search(pattern, corpus)
         if match:
             return collapse(anchor).replace("{}", match.group(1))
     return None
+
+
+def check_stale_per_document(payload: dict[str, Any], documents: dict[str, str]) -> list[str]:
+    """Any document using a metric's wording must carry that metric's current value.
+
+    Searched per document rather than over the union, because the union lets a stale sentence
+    in one file hide behind a correct one in another.
+    """
+    failures: list[str] = []
+    for name, value in sorted(payload["metrics"].items()):
+        allowed = set(format_value(value))
+        for anchor in payload["anchors"].get(name, []):
+            pattern = re.escape(collapse(anchor)).replace(r"\{\}", r"(\d[\d,.]*)")
+            for document, text in documents.items():
+                for match in re.finditer(pattern, collapse(text)):
+                    found = match.group(1)
+                    if found not in allowed and found.rstrip(".") not in allowed:
+                        failures.append(
+                            f"STALE   {document}: {name} is {value} but the document says "
+                            f"{collapse(anchor).replace('{}', found)!r}"
+                        )
+    return failures
 
 
 def check_backward(payload: dict[str, Any], readme: str) -> list[str]:
@@ -133,6 +166,7 @@ def main() -> int:
 
     problems = [f"MISSING {name}: listed as a checked document and not present" for name in missing]
     problems += check_forward(payload, documents)
+    problems += check_stale_per_document(payload, documents)
     problems += check_backward(payload, documents.get("README.md", ""))
 
     if problems:
@@ -142,7 +176,7 @@ def main() -> int:
         return 1
     print(
         f"number check passed: {len(payload['metrics'])} metrics verified against "
-        f"{len(documents)} documents"
+        f"{len(documents)} documents, forwards, per document and backwards"
     )
     return 0
 

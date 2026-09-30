@@ -40,18 +40,20 @@ CHECKED_DOCUMENTS = [
 ]
 
 ANCHORS: dict[str, list[str]] = {
-    "tests_total": ["{} tests"],
+    "tests_total": ["{} tests,"],
     "coverage_line_pct": ["{}% line"],
     "coverage_branch_pct": ["{}% branch"],
     "fixture_events": ["{} events"],
-    "fixture_keys": ["{} keys", "{} primary keys"],
-    "fixture_batches": ["{} micro-batches", "{} batches"],
+    "fixture_keys": ["{} primary keys"],
+    "fixture_batches": ["{} micro-batches"],
     "rerun_keys_flagged": ["flags {} keys", "flagged {} keys", "found {} keys"],
-    "baseline_order_dependent": ["{} order-dependent", "{} of the keys"],
+    "baseline_order_dependent": ["{} order-dependent"],
     "baseline_order_dependent_pct": ["{}% of keys", "{}% of the keys"],
     "worst_impl_order_dependent": ["{} keys wrong", "wrong on {} keys"],
     "implementation_defect_keys": ["{} keys the declaration"],
     "cross_batch_only": ["{} of those keys", "{} unreachable keys", "{} keys no shuffle"],
+    "harness_detected_at_one_draw": ["draw finds {} keys"],
+    "harness_missed_at_one_draw": ["misses {} of them"],
     "harness_ceiling_detected": ["finds {} of", "flags {} of"],
     "harness_ceiling_pct": ["{}% of the provable", "ceiling of {}%"],
     "harness_saturation_draws": ["after {} draws", "past {} draws"],
@@ -148,6 +150,10 @@ def build_metrics(skip_tests: bool) -> dict[str, Any]:
         "worst_impl_order_dependent": worst["order_dependent_keys"],
         "implementation_defect_keys": worst["implementation_defect_keys"],
         "cross_batch_only": baseline["cross_batch_only_keys"],
+        "harness_detected_at_one_draw": power["points"][0]["detected"],
+        "harness_missed_at_one_draw": (
+            power["points"][0]["detectable"] - power["points"][0]["detected"]
+        ),
         "harness_ceiling_detected": power["ceiling_detected"],
         "harness_ceiling_pct": power["points"][-1]["rate_pct"],
         "harness_saturation_draws": power["saturation_draws"],

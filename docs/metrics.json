@@ -1,8 +1,7 @@
 {
   "anchors": {
     "baseline_order_dependent": [
-      "{} order-dependent",
-      "{} of the keys"
+      "{} order-dependent"
     ],
     "baseline_order_dependent_pct": [
       "{}% of keys",
@@ -28,14 +27,12 @@
       "down to {} keys"
     ],
     "fixture_batches": [
-      "{} micro-batches",
-      "{} batches"
+      "{} micro-batches"
     ],
     "fixture_events": [
       "{} events"
     ],
     "fixture_keys": [
-      "{} keys",
       "{} primary keys"
     ],
     "harness_ceiling_detected": [
@@ -46,9 +43,15 @@
       "{}% of the provable",
       "ceiling of {}%"
     ],
+    "harness_detected_at_one_draw": [
+      "draw finds {} keys"
+    ],
     "harness_max_draws": [
       "{} draws finds",
       "at {} draws"
+    ],
+    "harness_missed_at_one_draw": [
+      "misses {} of them"
     ],
     "harness_saturation_draws": [
       "after {} draws",
@@ -82,7 +85,7 @@
       "{} rows change"
     ],
     "tests_total": [
-      "{} tests"
+      "{} tests,"
     ],
     "unreachable_bound_pct": [
       "below {}%",
@@ -114,7 +117,9 @@
     "fixture_keys": 400,
     "harness_ceiling_detected": 18,
     "harness_ceiling_pct": 56.2,
+    "harness_detected_at_one_draw": 10,
     "harness_max_draws": 2000,
+    "harness_missed_at_one_draw": 22,
     "harness_saturation_draws": 5,
     "implementation_defect_keys": 293,
     "keys_spanning_batches": 109,

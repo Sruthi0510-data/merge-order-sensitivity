@@ -1,0 +1,133 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # Installs the dev extra and nothing else. This is the job that would catch a core module
+  # reaching for deltalake, which a machine with the extra installed can never notice.
+  test:
+    name: tests on ${{ matrix.python }} (no optional extras)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install without optional extras
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+
+      - name: Confirm the optional extra really is absent
+        run: |
+          python - <<'PY'
+          import importlib.util
+          if importlib.util.find_spec("deltalake") is not None:
+              raise SystemExit("deltalake is installed; this job must run without it")
+          print("deltalake is absent, as this job requires")
+          PY
+
+      - name: Lint
+        run: python -m ruff check .
+
+      - name: Tests
+        run: |
+          python -m pytest -q --cov=mos --cov-report=json:coverage.json \
+            --junitxml=junit.xml
+
+      - name: Coverage floor
+        run: |
+          python - <<'PY'
+          import json
+          totals = json.load(open("coverage.json"))["totals"]
+          pct = totals["percent_covered"]
+          print(f"line coverage {pct:.1f}%")
+          if pct < 95:
+              raise SystemExit(f"coverage {pct:.1f}% is below the floor of 95%")
+          PY
+
+  # Re-measures every published figure and fails when a document has drifted from the code.
+  # Tests run as their own step above and here, never inside the collector, so a red test
+  # surfaces as a failed pytest step rather than as a CalledProcessError from a metrics script.
+  receipts:
+    name: receipts and rendering
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install with every extra
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev,delta,report]"
+          python -m pip install cmarkgfm playwright
+          python -m playwright install --with-deps chromium
+
+      - name: Tests, with machine readable reports
+        run: |
+          python -m pytest -q --cov=mos --cov-report=json:coverage.json \
+            --junitxml=junit.xml
+
+      - name: Re-measure every published figure
+        run: python tools/collect_metrics.py --skip-tests
+
+      - name: Check the documents against the measurements
+        run: python tools/check_numbers.py
+
+      - name: Re-render the diagrams and fail if they drifted
+        run: |
+          python tools/render_diagrams.py
+          if ! git diff --quiet -- docs/diagrams; then
+            echo "committed diagrams differ from a fresh render:"
+            git --no-pager diff --stat -- docs/diagrams
+            exit 1
+          fi
+
+      - name: Assert the README images load in a browser
+        run: python tools/verify_rendering.py
+
+      - name: Regenerate the fixture and fail if it is not byte identical
+        run: |
+          python -m mos.cli generate --out fixtures/cdc_events.jsonl --keys 400 --seed 20260930
+          if ! git diff --quiet -- fixtures; then
+            echo "the seeded generator is no longer deterministic"
+            git --no-pager diff --stat -- fixtures
+            exit 1
+          fi
+
+      - name: Publish the awkward table to the job summary
+        run: |
+          {
+            echo "## What the permutation harness cannot reach"
+            echo
+            PYTHONPATH=experiments python experiments/exp02_detection_power.py
+            echo
+            PYTHONPATH=experiments python experiments/exp03_unreachable_space.py
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload experiment output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: experiments
+          path: |
+            docs/experiments/*.json
+            docs/metrics.json
+            junit.xml
+            coverage.json
