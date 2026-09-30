@@ -1,0 +1,131 @@
+{
+  "anchors": {
+    "baseline_order_dependent": [
+      "{} order-dependent",
+      "{} of the keys"
+    ],
+    "baseline_order_dependent_pct": [
+      "{}% of keys",
+      "{}% of the keys"
+    ],
+    "coverage_branch_pct": [
+      "{}% branch"
+    ],
+    "coverage_line_pct": [
+      "{}% line"
+    ],
+    "cross_batch_only": [
+      "{} of those keys",
+      "{} unreachable keys",
+      "{} keys no shuffle"
+    ],
+    "dedupe_reading_divergence": [
+      "disagree on {} rows",
+      "{} rows apart"
+    ],
+    "delete_wins_order_dependent": [
+      "leaves {} keys",
+      "down to {} keys"
+    ],
+    "fixture_batches": [
+      "{} micro-batches",
+      "{} batches"
+    ],
+    "fixture_events": [
+      "{} events"
+    ],
+    "fixture_keys": [
+      "{} keys",
+      "{} primary keys"
+    ],
+    "harness_ceiling_detected": [
+      "finds {} of",
+      "flags {} of"
+    ],
+    "harness_ceiling_pct": [
+      "{}% of the provable",
+      "ceiling of {}%"
+    ],
+    "harness_max_draws": [
+      "{} draws finds",
+      "at {} draws"
+    ],
+    "harness_saturation_draws": [
+      "after {} draws",
+      "past {} draws"
+    ],
+    "implementation_defect_keys": [
+      "{} keys the declaration"
+    ],
+    "keys_spanning_batches": [
+      "{} keys straddle",
+      "{} of the keys straddle"
+    ],
+    "orders_in_gap": [
+      "{} orders no",
+      "{} unreachable orders"
+    ],
+    "orders_reachable": [
+      "{} of them reachable",
+      "{} are reachable"
+    ],
+    "orders_that_exist": [
+      "{} arrival orders"
+    ],
+    "rerun_keys_flagged": [
+      "flags {} keys",
+      "flagged {} keys",
+      "found {} keys"
+    ],
+    "rows_changed_by_fix": [
+      "rewrites {} rows",
+      "{} rows change"
+    ],
+    "tests_total": [
+      "{} tests"
+    ],
+    "unreachable_bound_pct": [
+      "below {}%",
+      "under {}%"
+    ],
+    "worst_impl_order_dependent": [
+      "{} keys wrong",
+      "wrong on {} keys"
+    ]
+  },
+  "checked_documents": [
+    "README.md",
+    "docs/adr/ADR-001-the-referee-is-a-third-implementation.md",
+    "docs/adr/ADR-002-batch-boundaries-bound-the-search.md",
+    "docs/adr/ADR-003-no-spark-in-the-default-path.md",
+    "docs/adr/ADR-004-exit-codes-separate-a-finding-from-a-failure.md",
+    "docs/adr/ADR-005-what-this-repository-cannot-measure.md"
+  ],
+  "metrics": {
+    "baseline_order_dependent": 32,
+    "baseline_order_dependent_pct": 8.0,
+    "coverage_branch_pct": 100.0,
+    "coverage_line_pct": 100.0,
+    "cross_batch_only": 14,
+    "dedupe_reading_divergence": 32,
+    "delete_wins_order_dependent": 25,
+    "fixture_batches": 6,
+    "fixture_events": 1250,
+    "fixture_keys": 400,
+    "harness_ceiling_detected": 18,
+    "harness_ceiling_pct": 56.2,
+    "harness_max_draws": 2000,
+    "harness_saturation_draws": 5,
+    "implementation_defect_keys": 293,
+    "keys_spanning_batches": 109,
+    "orders_in_gap": 3403,
+    "orders_reachable": 10046,
+    "orders_that_exist": 13449,
+    "rerun_keys_flagged": 0,
+    "rows_changed_by_fix": 9,
+    "tests_total": 296,
+    "unreachable_bound_pct": 21.4,
+    "worst_impl_order_dependent": 325
+  },
+  "note": "every value here is produced by running the suite and the experiments; tools/check_numbers.py fails the build when a document quotes a figure the code no longer produces"
+}

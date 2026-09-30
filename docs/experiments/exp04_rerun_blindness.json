@@ -1,0 +1,30 @@
+{
+  "implementations": {
+    "arrival-lww": {
+      "audit_order_dependent_keys": 325,
+      "rerun_keys_flagged": 0,
+      "rerun_keys_flagged_over_repeats": 0
+    },
+    "dedupe-first-max": {
+      "audit_order_dependent_keys": 32,
+      "rerun_keys_flagged": 0,
+      "rerun_keys_flagged_over_repeats": 0
+    },
+    "dedupe-last-max": {
+      "audit_order_dependent_keys": 32,
+      "rerun_keys_flagged": 0,
+      "rerun_keys_flagged_over_repeats": 0
+    },
+    "delete-wins": {
+      "audit_order_dependent_keys": 25,
+      "rerun_keys_flagged": 0,
+      "rerun_keys_flagged_over_repeats": 0
+    },
+    "total-order": {
+      "audit_order_dependent_keys": 0,
+      "rerun_keys_flagged": 0,
+      "rerun_keys_flagged_over_repeats": 0
+    }
+  },
+  "repeats": 5
+}

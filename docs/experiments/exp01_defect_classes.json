@@ -1,0 +1,48 @@
+{
+  "fixture": {
+    "events": 1250,
+    "keys": 400
+  },
+  "implementations": {
+    "arrival-lww": {
+      "cross_batch_only_keys": 54,
+      "implementation_defect_keys": 293,
+      "order_dependent_keys": 325,
+      "order_dependent_pct": 81.2,
+      "rerun_keys_flagged": 0,
+      "spec_ambiguous_keys": 32
+    },
+    "dedupe-first-max": {
+      "cross_batch_only_keys": 14,
+      "implementation_defect_keys": 0,
+      "order_dependent_keys": 32,
+      "order_dependent_pct": 8.0,
+      "rerun_keys_flagged": 0,
+      "spec_ambiguous_keys": 32
+    },
+    "dedupe-last-max": {
+      "cross_batch_only_keys": 14,
+      "implementation_defect_keys": 0,
+      "order_dependent_keys": 32,
+      "order_dependent_pct": 8.0,
+      "rerun_keys_flagged": 0,
+      "spec_ambiguous_keys": 32
+    },
+    "delete-wins": {
+      "cross_batch_only_keys": 11,
+      "implementation_defect_keys": 0,
+      "order_dependent_keys": 25,
+      "order_dependent_pct": 6.2,
+      "rerun_keys_flagged": 0,
+      "spec_ambiguous_keys": 32
+    },
+    "total-order": {
+      "cross_batch_only_keys": 0,
+      "implementation_defect_keys": 0,
+      "order_dependent_keys": 0,
+      "order_dependent_pct": 0.0,
+      "rerun_keys_flagged": 0,
+      "spec_ambiguous_keys": 32
+    }
+  }
+}

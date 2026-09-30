@@ -57,6 +57,7 @@ ignore = ["B008"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["mos", "tests"]
+known-local-folder = ["_common"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["ARG001", "ARG002"]

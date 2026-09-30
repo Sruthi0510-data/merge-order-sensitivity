@@ -1,0 +1,89 @@
+{
+  "ceiling_detected": 18,
+  "cross_batch_only_keys": 14,
+  "implementation": "dedupe-last-max",
+  "max_draws": 2000,
+  "missed_at_ceiling": 14,
+  "missed_equals_cross_batch": true,
+  "order_dependent_keys": 32,
+  "points": [
+    {
+      "detectable": 32,
+      "detected": 10,
+      "draws": 1,
+      "rate_pct": 31.2,
+      "upper_bound_pct_when_zero": null
+    },
+    {
+      "detectable": 32,
+      "detected": 15,
+      "draws": 2,
+      "rate_pct": 46.9,
+      "upper_bound_pct_when_zero": null
+    },
+    {
+      "detectable": 32,
+      "detected": 18,
+      "draws": 5,
+      "rate_pct": 56.2,
+      "upper_bound_pct_when_zero": null
+    },
+    {
+      "detectable": 32,
+      "detected": 18,
+      "draws": 10,
+      "rate_pct": 56.2,
+      "upper_bound_pct_when_zero": null
+    },
+    {
+      "detectable": 32,
+      "detected": 18,
+      "draws": 25,
+      "rate_pct": 56.2,
+      "upper_bound_pct_when_zero": null
+    },
+    {
+      "detectable": 32,
+      "detected": 18,
+      "draws": 50,
+      "rate_pct": 56.2,
+      "upper_bound_pct_when_zero": null
+    },
+    {
+      "detectable": 32,
+      "detected": 18,
+      "draws": 100,
+      "rate_pct": 56.2,
+      "upper_bound_pct_when_zero": null
+    },
+    {
+      "detectable": 32,
+      "detected": 18,
+      "draws": 250,
+      "rate_pct": 56.2,
+      "upper_bound_pct_when_zero": null
+    },
+    {
+      "detectable": 32,
+      "detected": 18,
+      "draws": 500,
+      "rate_pct": 56.2,
+      "upper_bound_pct_when_zero": null
+    },
+    {
+      "detectable": 32,
+      "detected": 18,
+      "draws": 1000,
+      "rate_pct": 56.2,
+      "upper_bound_pct_when_zero": null
+    },
+    {
+      "detectable": 32,
+      "detected": 18,
+      "draws": 2000,
+      "rate_pct": 56.2,
+      "upper_bound_pct_when_zero": null
+    }
+  ],
+  "saturation_draws": 5
+}

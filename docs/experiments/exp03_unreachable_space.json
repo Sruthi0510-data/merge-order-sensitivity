@@ -1,0 +1,17 @@
+{
+  "keys_audited": 400,
+  "keys_spanning_batches": 109,
+  "order_dependent_keys": 32,
+  "orders_in_gap": 3403,
+  "orders_reachable": 10046,
+  "orders_that_exist": 13449,
+  "probe": {
+    "detectable": 14,
+    "detected": 0,
+    "draws": 2000,
+    "rate_pct": 0.0,
+    "upper_bound_pct_when_zero": 21.4
+  },
+  "probe_draws": 2000,
+  "unreachable_keys": 14
+}

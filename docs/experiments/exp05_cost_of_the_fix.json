@@ -1,0 +1,8 @@
+{
+  "keys_total": 400,
+  "order_dependent_after": 0,
+  "order_dependent_before": 32,
+  "rows_changed_by_delete_rule": 2,
+  "rows_changed_by_fix": 9,
+  "rows_differing_between_dedupe_readings": 32
+}
