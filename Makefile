@@ -4,7 +4,8 @@
 PYTHON ?= python3
 COVERAGE_FLOOR ?= 95
 
-.PHONY: help install lint test experiments receipts diagrams rendering verify fixture clean
+.PHONY: help install lint test experiments receipts diagrams rendering report screenshots \
+	verify fixture clean
 
 help:
 	@echo "install      editable install with the dev extra"
@@ -14,6 +15,8 @@ help:
 	@echo "receipts     re-measure every published figure and check it against the prose"
 	@echo "diagrams     re-render the committed SVGs from docs/metrics.json"
 	@echo "rendering    render the README as GitHub does and assert the images load"
+	@echo "report       write docs/report.html from the shipped fixture"
+	@echo "screenshots  capture the README evidence from that report"
 	@echo "verify       lint, test, receipts. Offline, from a fresh clone"
 
 install:
@@ -48,6 +51,12 @@ diagrams:
 
 rendering:
 	$(PYTHON) tools/verify_rendering.py
+
+report:
+	-$(PYTHON) -m mos.cli report --out docs/report.html
+
+screenshots: report
+	$(PYTHON) tools/capture_screenshots.py
 
 fixture:
 	$(PYTHON) -m mos.cli generate --out fixtures/cdc_events.jsonl --keys 400 --seed 20260930

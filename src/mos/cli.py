@@ -77,6 +77,13 @@ def _build_parser() -> argparse.ArgumentParser:
     wit.add_argument("--order-by", default="seq")
     wit.add_argument("--delete-wins", action="store_true")
 
+    rep = sub.add_parser("report", help="write a self-contained HTML report")
+    rep.add_argument("--fixture", type=Path, default=DEFAULT_FIXTURE)
+    rep.add_argument("--impl", default="dedupe-last-max", choices=sorted(IMPLEMENTATIONS))
+    rep.add_argument("--order-by", default="seq")
+    rep.add_argument("--delete-wins", action="store_true")
+    rep.add_argument("--out", type=Path, default=Path("docs/report.html"))
+
     har = sub.add_parser("harness", help="simulate the permutation harness a team would build")
     har.add_argument("--fixture", type=Path, default=DEFAULT_FIXTURE)
     har.add_argument("--impl", default="dedupe-last-max", choices=sorted(IMPLEMENTATIONS))
@@ -197,8 +204,20 @@ def _cmd_harness(args: argparse.Namespace, out) -> int:
     return exit_codes.FINDING if missed else exit_codes.OK
 
 
+def _cmd_report(args: argparse.Namespace, out) -> int:
+    from mos.report import build_report
+
+    events = load_events(args.fixture)
+    result = audit(events, spec=_spec_from_args(args), implementation=args.impl)
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    args.out.write_text(build_report(result), encoding="utf-8")
+    print(f"wrote {args.out} for {result.key_count} keys", file=out)
+    return exit_codes.FINDING if result.order_dependent else exit_codes.OK
+
+
 HANDLERS = {
     "generate": _cmd_generate,
+    "report": _cmd_report,
     "audit": _cmd_audit,
     "compare": _cmd_compare,
     "witness": _cmd_witness,

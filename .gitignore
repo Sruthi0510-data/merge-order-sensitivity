@@ -12,6 +12,6 @@ coverage.json
 .ruff_cache/
 junit.xml
 htmlcov/
+# docs/report.html is regenerable and not committed; the screenshots taken from it are
 docs/report.html
-docs/video/*.webm
 .delta-scratch/

@@ -99,6 +99,11 @@ jobs:
             exit 1
           fi
 
+      - name: Rebuild the report and recapture the evidence
+        run: |
+          python -m mos.cli report --out docs/report.html || true
+          python tools/capture_screenshots.py
+
       - name: Assert the README images load in a browser
         run: python tools/verify_rendering.py
 
@@ -129,5 +134,7 @@ jobs:
           path: |
             docs/experiments/*.json
             docs/metrics.json
+            docs/img/*.png
+            docs/img/manifest.json
             junit.xml
             coverage.json

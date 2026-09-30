@@ -203,6 +203,37 @@ def test_witness_on_an_order_safe_implementation_reports_no_finding():
     assert "no order-dependent behaviour" in text
 
 
+def test_report_writes_a_self_contained_html_file(tmp_path: Path):
+    target = tmp_path / "nested" / "report.html"
+    code, text = run("report", "--fixture", str(FIXTURE_PATH), "--out", str(target))
+    assert code == exit_codes.FINDING
+    assert "400 keys" in text
+    body = target.read_text()
+    assert body.startswith("<!doctype html>")
+    assert "<link" not in body
+
+
+def test_report_returns_ok_for_an_order_safe_implementation(tmp_path: Path):
+    code, _ = run(
+        "report",
+        "--fixture", str(FIXTURE_PATH),
+        "--impl", "total-order",
+        "--out", str(tmp_path / "r.html"),
+    )
+    assert code == exit_codes.OK
+
+
+def test_report_refuses_an_unknown_ordering_field(tmp_path: Path):
+    code, text = run(
+        "report",
+        "--fixture", str(FIXTURE_PATH),
+        "--order-by", "nonsense",
+        "--out", str(tmp_path / "r.html"),
+    )
+    assert code == exit_codes.USAGE
+    assert "unknown ordering field" in text
+
+
 def test_harness_reports_the_keys_it_missed():
     code, text = run("harness", "--fixture", str(FIXTURE_PATH), "--draws", "20")
     assert code == exit_codes.FINDING

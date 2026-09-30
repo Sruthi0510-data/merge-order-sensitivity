@@ -1,0 +1,32 @@
+{
+  "shots": [
+    {
+      "image": "docs/img/report-summary.png",
+      "source": "docs/report.html",
+      "framed_from": "summary",
+      "framed_to": "breakdown",
+      "height_px": 276
+    },
+    {
+      "image": "docs/img/report-breakdown.png",
+      "source": "docs/report.html",
+      "framed_from": "breakdown",
+      "framed_to": "witnesses",
+      "height_px": 297
+    },
+    {
+      "image": "docs/img/report-witnesses.png",
+      "source": "docs/report.html",
+      "framed_from": "witnesses",
+      "framed_to": null,
+      "height_px": 996
+    }
+  ],
+  "badge": {
+    "colour": "rgb(255, 255, 255)",
+    "background": "rgb(180, 35, 24)",
+    "text": "ORDER DEPENDENT: 32 keys",
+    "visible": true
+  },
+  "note": "captured from the report the tool generates, framed by heading id, with the verdict badge contrast read back from the rendered page"
+}

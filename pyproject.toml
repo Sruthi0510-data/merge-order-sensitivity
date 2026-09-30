@@ -37,7 +37,6 @@ markers = [
 [tool.coverage.run]
 branch = true
 source = ["mos"]
-omit = ["*/mos/report.py"]
 
 [tool.coverage.report]
 exclude_lines = [
