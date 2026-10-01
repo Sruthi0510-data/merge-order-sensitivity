@@ -10,8 +10,7 @@
       "output_lines": 25,
       "output": "............................................................................................ [ 26%]\n............................................................................................ [ 53%]\n.....s...................................................................................... [ 80%]\n...................................................................                          [100%]\n========================================== tests coverage ==========================================\n_________________________ coverage: platform linux, python 3.11.15-final-0 _________________________\n\nName                         Stmts   Miss Branch BrPart  Cover   Missing\n------------------------------------------------------------------------\nsrc/mos/__init__.py              4      0      0      0   100%\nsrc/mos/audit.py               139      0     20      0   100%\nsrc/mos/cli.py                 150      0     18      0   100%\nsrc/mos/delta.py                38      0     12      0   100%\nsrc/mos/detection.py            39      0     16      0   100%\nsrc/mos/errors.py                4      0      0      0   100%\nsrc/mos/events.py               86      0     24      0   100%\nsrc/mos/exit_codes.py            9      0      0      0   100%\nsrc/mos/generator.py            69      0     30      0   100%\nsrc/mos/implementations.py      62      0     22      0   100%\nsrc/mos/permute.py              54      0     22      0   100%\nsrc/mos/report.py               30      0      4      0   100%\nsrc/mos/semantics.py           102      0     28      0   100%\n------------------------------------------------------------------------\nTOTAL                          786      0    196      0   100%\nRequired test coverage of 100% reached. Total coverage: 100.00%",
       "max_lines": 16,
-      "tail_lines": 4,
-      "seconds": 64.65
+      "tail_lines": 4
     },
     {
       "label": "the audit against the reviewed declaration: a finding, not a failure",
@@ -22,8 +21,7 @@
       "output_lines": 22,
       "output": "{\n  \"implementation\": \"dedupe-last-max\",\n  \"spec\": {\n    \"ordering\": [\n      \"seq\"\n    ],\n    \"delete_wins_ties\": false\n  },\n  \"events\": 1250,\n  \"batches\": 6,\n  \"keys\": 400,\n  \"rerun_test_passed\": true,\n  \"rerun_keys_flagged\": 0,\n  \"order_dependent_keys\": 32,\n  \"order_dependent_within_batch_keys\": 18,\n  \"cross_batch_only_keys\": 14,\n  \"spec_ambiguous_keys\": 32,\n  \"implementation_defect_keys\": 0,\n  \"disagrees_with_referee_keys\": 32,\n  \"order_dependent_pct\": 8.0,\n  \"cross_batch_only_pct\": 3.5\n}",
       "max_lines": 16,
-      "tail_lines": 6,
-      "seconds": 0.17
+      "tail_lines": 6
     },
     {
       "label": "one key, and the two orders that leave it in two different states",
@@ -34,8 +32,7 @@
       "output_lines": 3,
       "output": "acct-00055: order dependent (reachable inside one batch)\n  order A [187, 188, 186, 189, 190] leaves {'amount_cents': 814352, 'revision': 4, 'status': 'reversed'}\n  order B [187, 188, 186, 190, 189] leaves {'amount_cents': 820329, 'revision': 3, 'status': 'authorised'}",
       "max_lines": 8,
-      "tail_lines": 0,
-      "seconds": 0.17
+      "tail_lines": 0
     },
     {
       "label": "every bundled implementation, side by side",
@@ -46,8 +43,7 @@
       "output_lines": 7,
       "output": "implementation     order-dep  cross-batch  impl-defect   rerun\n--------------------------------------------------------------\narrival-lww              325           54          293       0\ndedupe-first-max          32           14            0       0\ndedupe-last-max           32           14            0       0\ndelete-wins               25           11            0       0\ntotal-order                0            0            0       0",
       "max_lines": 12,
-      "tail_lines": 0,
-      "seconds": 0.56
+      "tail_lines": 0
     },
     {
       "label": "a total ordering removes the ambiguity entirely",
@@ -58,8 +54,7 @@
       "output_lines": 22,
       "output": "{\n  \"implementation\": \"total-order\",\n  \"spec\": {\n    \"ordering\": [\n      \"seq\"\n    ],\n    \"delete_wins_ties\": false\n  },\n  \"events\": 1250,\n  \"batches\": 6,\n  \"keys\": 400,\n  \"rerun_test_passed\": true,\n  \"rerun_keys_flagged\": 0,\n  \"order_dependent_keys\": 0,\n  \"order_dependent_within_batch_keys\": 0,\n  \"cross_batch_only_keys\": 0,\n  \"spec_ambiguous_keys\": 32,\n  \"implementation_defect_keys\": 0,\n  \"disagrees_with_referee_keys\": 32,\n  \"order_dependent_pct\": 0.0,\n  \"cross_batch_only_pct\": 0.0\n}",
       "max_lines": 12,
-      "tail_lines": 5,
-      "seconds": 0.19
+      "tail_lines": 5
     },
     {
       "label": "a budget that cannot support the confidence asked for: a refusal",
@@ -70,8 +65,7 @@
       "output_lines": 23,
       "output": "{\n  \"implementation\": \"dedupe-last-max\",\n  \"spec\": {\n    \"ordering\": [\n      \"seq\"\n    ],\n    \"delete_wins_ties\": false\n  },\n  \"events\": 1250,\n  \"batches\": 6,\n  \"keys\": 400,\n  \"rerun_test_passed\": true,\n  \"rerun_keys_flagged\": 0,\n  \"order_dependent_keys\": 32,\n  \"order_dependent_within_batch_keys\": 17,\n  \"cross_batch_only_keys\": 15,\n  \"spec_ambiguous_keys\": 32,\n  \"implementation_defect_keys\": 0,\n  \"disagrees_with_referee_keys\": 32,\n  \"order_dependent_pct\": 8.0,\n  \"cross_batch_only_pct\": 3.8\n}\nsearch limit 4 is below the 27 draws a two-outcome key needs for confidence 0.99999999",
       "max_lines": 6,
-      "tail_lines": 3,
-      "seconds": 0.17
+      "tail_lines": 3
     },
     {
       "label": "an unreadable fixture",
@@ -82,8 +76,7 @@
       "output_lines": 1,
       "output": "error: fixture not found: does-not-exist.jsonl",
       "max_lines": 3,
-      "tail_lines": 0,
-      "seconds": 0.05
+      "tail_lines": 0
     },
     {
       "label": "every published figure re-checked against the prose",
@@ -94,8 +87,7 @@
       "output_lines": 1,
       "output": "number check passed: 26 metrics verified against 7 documents, forwards, per document and backwards",
       "max_lines": 3,
-      "tail_lines": 0,
-      "seconds": 0.1
+      "tail_lines": 0
     }
   ]
 }
