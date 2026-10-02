@@ -9,7 +9,9 @@ source, and the screenshot tool reads the rendered contrast back as a second lin
 
 from __future__ import annotations
 
+import json
 import re
+from pathlib import Path
 
 import pytest
 
@@ -134,12 +136,6 @@ def test_the_two_verdict_classes_have_different_backgrounds():
     assert finding and clear
     assert finding.group(1) != clear.group(1)
 
-
-# The proof-of-work transcript. These assertions are about a committed artefact
-# rather than about a function, so they need only the standard library and the
-# repository root.
-import json
-from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 

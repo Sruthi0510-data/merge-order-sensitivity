@@ -69,10 +69,7 @@ def strip_code(text: str) -> str:
 
 def format_value(value: Any) -> list[str]:
     """Render a metric the ways a document might legitimately write it."""
-    if isinstance(value, float):
-        rendered = [f"{value:g}", f"{value:.1f}"]
-    else:
-        rendered = [f"{value:,}", str(value)]
+    rendered = [f"{value:g}", f"{value:.1f}"] if isinstance(value, float) else [f"{value:,}", str(value)]
     seen: list[str] = []
     for candidate in rendered:
         if candidate not in seen:
