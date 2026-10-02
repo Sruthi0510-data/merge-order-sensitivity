@@ -19,6 +19,17 @@ dev = [
   "pytest>=7.4",
   "pytest-cov>=4.1",
   "ruff>=0.4",
+
+  # The suite and the artefact build need these, so `dev` installs them.
+  # An optional module that continuous integration never installs is a
+  # module continuous integration never covers, and the coverage floor
+  # then passes by not looking.
+  "coverage>=7",
+  "playwright>=1.40",
+  "cmarkgfm>=2024.1.14",
+  "deltalake>=0.15",
+  "pyarrow>=14",
+  "jinja2>=3.1",
 ]
 
 [project.scripts]
