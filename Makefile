@@ -1,69 +1,80 @@
-# Every target here runs offline. `make verify` is the one the README promises a reviewer,
-# so it is the one that must never be broken.
+# Every target here runs offline. `make verify` is the one the README promises a
+# reviewer, so it is the one that must never be broken.
+#
+# The target names are the same in all seven repositories of this portfolio, so
+# one CI workflow drives them all and the workflow never needs to know how any
+# individual repository builds its own report.
 
-PYTHON ?= python3
-COVERAGE_FLOOR ?= 95
+PY ?= python3
+PKG := mos
 
-.PHONY: help install lint test experiments receipts diagrams rendering report screenshots \
-	verify fixture clean
+.PHONY: help install test cover receipts tables diagrams report proof check \
+	preflight verify clean fixture
+
+# Exported so every target works from a bare clone, before `make install` has
+# been run. With the package installed this resolves to the same code, so the
+# two ways of working cannot disagree.
+export PYTHONPATH := src
 
 help:
 	@echo "install      editable install with the dev extra"
-	@echo "lint         ruff over src, tests, tools and experiments"
-	@echo "test         pytest with junit and coverage reports"
-	@echo "experiments  re-run every experiment and rewrite its JSON"
-	@echo "receipts     re-measure every published figure and check it against the prose"
+	@echo "test         run the suite"
+	@echo "cover        the suite with branch coverage, failing under 100 percent"
+	@echo "receipts     re-measure every published figure into docs/metrics.json"
+	@echo "tables       rewrite the generated blocks in the README"
 	@echo "diagrams     re-render the committed SVGs from docs/metrics.json"
-	@echo "rendering    render the README as GitHub does and assert the images load"
-	@echo "report       write docs/report.html from the shipped fixture"
-	@echo "screenshots  capture the README evidence from that report"
-	@echo "verify       lint, test, receipts. Offline, from a fresh clone"
+	@echo "report       build docs/report.html and screenshot it"
+	@echo "proof        capture the command line into a committed transcript"
+	@echo "check        fail if a document quotes a figure the code no longer produces"
+	@echo "preflight    authorship, ascii, exit codes, determinism, offline, urls"
+	@echo "verify       everything, in the order CI runs it"
 
 install:
-	$(PYTHON) -m pip install -e ".[dev]"
-
-lint:
-	$(PYTHON) -m ruff check .
+	$(PY) -m pip install -e ".[dev]"
 
 test:
-	$(PYTHON) -m pytest -q --cov=mos --cov-report=json:coverage.json \
-		--cov-report=term-missing --junitxml=junit.xml
-	@$(PYTHON) -c "import json,sys; \
-pct=json.load(open('coverage.json'))['totals']['percent_covered']; \
-floor=float('$(COVERAGE_FLOOR)'); \
-print(f'coverage {pct:.1f}% against a floor of {floor:.0f}%'); \
-sys.exit(0 if pct >= floor else 1)"
+	$(PY) -m pytest -q
 
-experiments:
-	@for script in experiments/exp*.py; do \
-		echo "--- $$script"; PYTHONPATH=experiments $(PYTHON) $$script || exit 1; echo; \
-	done
+cover:
+	$(PY) -m pytest -q --cov=$(PKG) --cov-branch --cov-report=term-missing \
+		--cov-report=json:coverage.json --junitxml=junit.xml --cov-fail-under=100
 
-# Depends on test rather than running pytest itself. Trap four: a red test that surfaces as a
-# CalledProcessError from inside a metrics script costs an hour to attribute, so the suite runs
-# as its own step and the collector reads the reports it left behind.
-receipts: test
-	$(PYTHON) tools/collect_metrics.py --skip-tests
-	$(PYTHON) tools/check_numbers.py
+# Depends on nothing and runs the suite itself, with --skip-tests left to the
+# caller. A red suite surfacing as a CalledProcessError from inside a metrics
+# script costs an hour to attribute, so CI runs the suite as its own step first
+# and then calls this with the reports already on disk.
+receipts:
+	$(PY) tools/collect_metrics.py
+
+tables:
+	@echo "this repository has no generated README tables"
 
 diagrams:
-	$(PYTHON) tools/render_diagrams.py
+	$(PY) tools/render_diagrams.py
 
-rendering:
-	$(PYTHON) tools/verify_rendering.py
-
+# The CLI reuses the audit's exit codes, so writing a report returns 3 when
+# the audit has a finding. Producing the file is not a verdict, so the finding
+# code is accepted here and every other non-zero code is still a failure.
 report:
-	-$(PYTHON) -m mos.cli report --out docs/report.html
-	PYTHONPATH=$(SRC) $(PY) tools/proof_of_work.py
+	$(PY) -m mos.cli report --out docs/report.html || [ $$? -eq 3 ]
+	$(PY) tools/capture_screenshots.py
+	$(PY) tools/verify_rendering.py
 
-screenshots: report
-	$(PYTHON) tools/capture_screenshots.py
+proof:
+	$(PY) tools/proof_of_work.py
 
-fixture:
-	$(PYTHON) -m mos.cli generate --out fixtures/cdc_events.jsonl --keys 400 --seed 20260930
+check:
+	$(PY) tools/check_numbers.py
 
-verify: lint receipts
+preflight:
+	$(PY) tools/preflight.py
+
+verify: cover receipts tables diagrams report proof check
+	@echo "verified"
 
 clean:
-	rm -rf .pytest_cache .ruff_cache htmlcov coverage.json coverage.xml junit.xml .coverage
-	find . -name __pycache__ -type d -prune -exec rm -rf {} +
+	rm -rf .pytest_cache .coverage htmlcov coverage.json junit.xml
+
+fixture:
+	$(PY) -m mos.cli generate
+

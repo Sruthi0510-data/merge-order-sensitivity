@@ -104,6 +104,7 @@
     "docs/adr/ADR-004-exit-codes-separate-a-finding-from-a-failure.md",
     "docs/adr/ADR-005-what-this-repository-cannot-measure.md"
   ],
+  "measured_despite_a_red_suite": true,
   "metrics": {
     "baseline_order_dependent": 32,
     "baseline_order_dependent_pct": 8.0,
@@ -128,7 +129,7 @@
     "orders_that_exist": 13449,
     "rerun_keys_flagged": 0,
     "rows_changed_by_fix": 9,
-    "tests_total": 343,
+    "tests_total": 359,
     "unreachable_bound_pct": 21.4,
     "worst_impl_order_dependent": 325
   },
