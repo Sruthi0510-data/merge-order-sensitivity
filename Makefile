@@ -81,4 +81,3 @@ clean:
 
 fixture:
 	$(PY) -m mos.cli generate
-
